@@ -120,13 +120,17 @@ export async function createCategory(
 ): Promise<string> {
   const firestore = requireDb();
   const trimmedName = payload.name.trim();
-  if (!trimmedName) {
-    throw new Error('Nama kategori wajib diisi.');
+  const trimmedColor = payload.color.trim();
+  if (!trimmedName || trimmedName.length > 50) {
+    throw new Error('Nama kategori harus antara 1 sampai 50 karakter.');
+  }
+  if (!trimmedColor || trimmedColor.length > 20) {
+    throw new Error('Format warna kategori tidak valid.');
   }
   const ref = await addDoc(collection(firestore, 'users', uid, 'categories'), {
     name: trimmedName,
     type: payload.type,
-    color: payload.color,
+    color: trimmedColor,
   });
   return ref.id;
 }
@@ -215,24 +219,53 @@ export function subscribeMultiMonthTransactions(
   );
 }
 
+const MAX_RUPIAH = 1_000_000_000_000;
+const DATE_REGEX = /^\d{4}-\d{2}-\d{2}$/;
+const MONTH_KEY_REGEX = /^\d{4}-\d{2}$/;
+
+function validateTransactionInput(input: TransactionInput) {
+  const amount = Math.round(Number(input.amount));
+  if (!Number.isSafeInteger(amount) || amount <= 0 || amount >= MAX_RUPIAH) {
+    throw new Error('Nominal harus di antara Rp 1 dan Rp 999.999.999.999.');
+  }
+  if (!DATE_REGEX.test(input.date)) {
+    throw new Error('Format tanggal harus YYYY-MM-DD.');
+  }
+  const categoryId = input.categoryId.trim();
+  const categoryName = input.categoryName.trim();
+  if (!categoryId || categoryId.length > 100) {
+    throw new Error('Kategori tidak valid.');
+  }
+  if (!categoryName || categoryName.length > 50) {
+    throw new Error('Nama kategori harus antara 1 sampai 50 karakter.');
+  }
+  const note = input.note.trim();
+  if (note.length > 200) {
+    throw new Error('Catatan maksimal 200 karakter.');
+  }
+  const monthKey = input.date.slice(0, 7);
+  if (!MONTH_KEY_REGEX.test(monthKey)) {
+    throw new Error('Format bulan transaksi tidak valid.');
+  }
+  return {
+    type: input.type,
+    amount,
+    categoryId,
+    categoryName,
+    date: input.date,
+    monthKey,
+    note,
+  };
+}
+
 export async function createTransaction(
   uid: string,
   input: TransactionInput
 ): Promise<string> {
   const firestore = requireDb();
-  const amount = Math.round(Number(input.amount));
-  if (!Number.isFinite(amount) || amount <= 0) {
-    throw new Error('Nominal harus lebih besar dari Rp 0.');
-  }
-  const monthKey = input.date.slice(0, 7);
+  const validated = validateTransactionInput(input);
   const ref = await addDoc(collection(firestore, 'users', uid, 'transactions'), {
-    type: input.type,
-    amount,
-    categoryId: input.categoryId,
-    categoryName: input.categoryName,
-    date: input.date,
-    monthKey,
-    note: input.note.trim(),
+    ...validated,
     createdAt: Date.now(),
   });
   return ref.id;
@@ -244,20 +277,8 @@ export async function updateTransaction(
   input: TransactionInput
 ): Promise<void> {
   const firestore = requireDb();
-  const amount = Math.round(Number(input.amount));
-  if (!Number.isFinite(amount) || amount <= 0) {
-    throw new Error('Nominal harus lebih besar dari Rp 0.');
-  }
-  const monthKey = input.date.slice(0, 7);
-  await updateDoc(doc(firestore, 'users', uid, 'transactions', transactionId), {
-    type: input.type,
-    amount,
-    categoryId: input.categoryId,
-    categoryName: input.categoryName,
-    date: input.date,
-    monthKey,
-    note: input.note.trim(),
-  });
+  const validated = validateTransactionInput(input);
+  await updateDoc(doc(firestore, 'users', uid, 'transactions', transactionId), validated);
 }
 
 export async function deleteTransaction(
@@ -305,14 +326,21 @@ export async function upsertBudget(
   limit: number
 ): Promise<void> {
   const firestore = requireDb();
-  const safeLimit = Math.round(Number(limit));
-  if (!Number.isFinite(safeLimit) || safeLimit <= 0) {
-    throw new Error('Batas budget harus lebih besar dari Rp 0.');
+  if (!MONTH_KEY_REGEX.test(monthKey)) {
+    throw new Error('Format bulan budget tidak valid.');
   }
-  const docId = categoryId ? `${monthKey}_${categoryId}` : `${monthKey}_total`;
+  const safeLimit = Math.round(Number(limit));
+  if (!Number.isSafeInteger(safeLimit) || safeLimit <= 0 || safeLimit >= MAX_RUPIAH) {
+    throw new Error('Batas budget harus di antara Rp 1 dan Rp 999.999.999.999.');
+  }
+  const normalizedCategoryId = categoryId ? categoryId.trim() : null;
+  if (normalizedCategoryId !== null && (normalizedCategoryId.length === 0 || normalizedCategoryId.length > 100)) {
+    throw new Error('Kategori budget tidak valid.');
+  }
+  const docId = normalizedCategoryId ? `${monthKey}_${normalizedCategoryId}` : `${monthKey}_total`;
   await setDoc(doc(firestore, 'users', uid, 'budgets', docId), {
     monthKey,
-    categoryId: categoryId ?? null,
+    categoryId: normalizedCategoryId,
     limit: safeLimit,
   });
 }

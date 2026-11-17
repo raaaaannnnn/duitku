@@ -1,8 +1,114 @@
 rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
-    match /users/{uid}/{document=**} {
-      allow read, write: if request.auth != null && request.auth.uid == uid;
+
+    function isOwner(uid) {
+      return request.auth != null && request.auth.uid == uid;
+    }
+
+    function isValidTransaction(data) {
+      return data.keys().hasAll([
+          'type',
+          'amount',
+          'categoryId',
+          'categoryName',
+          'date',
+          'monthKey',
+          'note',
+          'createdAt'
+        ])
+        && data.keys().hasOnly([
+          'type',
+          'amount',
+          'categoryId',
+          'categoryName',
+          'date',
+          'monthKey',
+          'note',
+          'createdAt'
+        ])
+        && data.type in ['income', 'expense']
+        && data.amount is int
+        && data.amount > 0
+        && data.amount < 1000000000000
+        && data.categoryId is string
+        && data.categoryId.size() >= 1
+        && data.categoryId.size() <= 100
+        && data.categoryName is string
+        && data.categoryName.size() >= 1
+        && data.categoryName.size() <= 50
+        && data.date is string
+        && data.date.matches('^\\d{4}-\\d{2}-\\d{2}$')
+        && data.monthKey is string
+        && data.monthKey.matches('^\\d{4}-\\d{2}$')
+        && data.note is string
+        && data.note.size() <= 200
+        && data.createdAt is int
+        && data.createdAt > 0;
+    }
+
+    function isValidCategory(data) {
+      return data.keys().hasAll(['name', 'type', 'color'])
+        && data.keys().hasOnly(['name', 'type', 'color'])
+        && data.name is string
+        && data.name.size() >= 1
+        && data.name.size() <= 50
+        && data.type in ['income', 'expense']
+        && data.color is string
+        && data.color.size() >= 1
+        && data.color.size() <= 20;
+    }
+
+    function isValidBudget(data) {
+      return data.keys().hasAll(['monthKey', 'categoryId', 'limit'])
+        && data.keys().hasOnly(['monthKey', 'categoryId', 'limit'])
+        && data.monthKey is string
+        && data.monthKey.matches('^\\d{4}-\\d{2}$')
+        && (
+          data.categoryId == null
+          || (data.categoryId is string && data.categoryId.size() >= 1 && data.categoryId.size() <= 100)
+        )
+        && data.limit is int
+        && data.limit >= 0
+        && data.limit < 1000000000000;
+    }
+
+    match /users/{uid} {
+      match /transactions/{transactionId} {
+        allow read: if isOwner(uid);
+        allow create: if isOwner(uid) && isValidTransaction(request.resource.data);
+        allow update: if isOwner(uid)
+          && isValidTransaction(request.resource.data)
+          && request.resource.data.createdAt == resource.data.createdAt;
+        allow delete: if isOwner(uid);
+      }
+
+      match /categories/{categoryId} {
+        allow read: if isOwner(uid);
+        allow create, update: if isOwner(uid) && isValidCategory(request.resource.data);
+        allow delete: if isOwner(uid);
+      }
+
+      match /budgets/{budgetId} {
+        allow read: if isOwner(uid);
+        allow create, update: if isOwner(uid) && isValidBudget(request.resource.data);
+        allow delete: if isOwner(uid);
+      }
+
+      match /meta/{docId} {
+        allow read: if isOwner(uid);
+        allow create: if isOwner(uid)
+          && docId == 'init'
+          && request.resource.data.keys().hasAll(['categoriesSeeded', 'seededAt'])
+          && request.resource.data.keys().hasOnly(['categoriesSeeded', 'seededAt'])
+          && request.resource.data.categoriesSeeded is bool
+          && request.resource.data.categoriesSeeded == true
+          && request.resource.data.seededAt is timestamp;
+      }
+    }
+
+    match /{document=**} {
+      allow read, write: if false;
     }
   }
 }

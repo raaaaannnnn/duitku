@@ -169,6 +169,11 @@ export function BudgetPage() {
       return;
     }
 
+    if (parsed >= 1_000_000_000_000) {
+      setFormError('Batas budget maksimal harus kurang dari Rp 1.000.000.000.000.');
+      return;
+    }
+
     setSaving(true);
     try {
       await upsertBudget(user.uid, monthKey, editingTarget.categoryId, parsed);

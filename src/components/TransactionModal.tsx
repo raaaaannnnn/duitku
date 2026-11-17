@@ -82,6 +82,11 @@ export function TransactionModal({
       return;
     }
 
+    if (parsedAmount >= 1_000_000_000_000) {
+      setError('Nominal maksimal harus kurang dari Rp 1.000.000.000.000.');
+      return;
+    }
+
     if (!date) {
       setError('Tanggal transaksi wajib dipilih.');
       return;
