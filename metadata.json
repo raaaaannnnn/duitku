@@ -1,0 +1,6 @@
+{
+  "name": "DuitKu",
+  "description": "Aplikasi pencatat keuangan pribadi untuk publik dengan Google Sign-In, pelacakan pemasukan & pengeluaran, manajemen kategori, anggaran bulanan, dan ekspor CSV.",
+  "requestFramePermissions": [],
+  "majorCapabilities": []
+}
