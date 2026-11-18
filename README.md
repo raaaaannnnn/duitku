@@ -24,6 +24,8 @@ DuitKu adalah aplikasi web pencatat keuangan pribadi berbasis **Single Page Appl
 ├── metadata.json
 ├── package.json
 ├── postcss.config.js
+├── public/
+│   └── favicon.svg
 ├── tailwind.config.js
 ├── tsconfig.json
 ├── vercel.json
@@ -35,6 +37,7 @@ DuitKu adalah aplikasi web pencatat keuangan pribadi berbasis **Single Page Appl
     ├── main.tsx
     ├── types.ts
     ├── components/
+    │   ├── BrandLogo.tsx
     │   ├── ConfirmModal.tsx
     │   ├── ErrorBoundary.tsx
     │   ├── Layout.tsx

@@ -8,8 +8,8 @@ import {
   PiggyBank,
   Sun,
   Tags,
-  Wallet,
 } from 'lucide-react';
+import { BrandLogo } from '@/components/BrandLogo';
 import { useAuth } from '@/lib/authContext';
 import { useTheme } from '@/lib/themeContext';
 import { useToast } from '@/lib/toastContext';
@@ -43,13 +43,8 @@ export function Layout() {
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex">
       {/* Desktop Sidebar */}
       <aside className="hidden lg:flex lg:w-64 lg:flex-col lg:fixed lg:inset-y-0 border-r border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900">
-        <div className="flex h-16 items-center gap-2.5 px-6 border-b border-slate-200 dark:border-slate-800">
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-600 text-white shrink-0">
-            <Wallet className="h-5 w-5" />
-          </div>
-          <span className="text-lg font-bold tracking-tight text-slate-900 dark:text-slate-100 whitespace-nowrap">
-            DuitKu
-          </span>
+        <div className="flex h-16 items-center px-6 border-b border-slate-200 dark:border-slate-800">
+          <BrandLogo size="md" />
         </div>
 
         <nav className="flex-1 px-3 py-5 space-y-1" aria-label="Navigasi utama">
@@ -137,14 +132,7 @@ export function Layout() {
       <div className="flex-1 lg:pl-64 flex flex-col min-w-0">
         {/* Compact Mobile Top Bar (< lg) */}
         <header className="lg:hidden sticky top-0 z-30 h-14 border-b border-slate-200 dark:border-slate-800 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md px-4 flex items-center justify-between gap-4">
-          <div className="flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-600 text-white shrink-0">
-              <Wallet className="h-4 w-4" />
-            </div>
-            <span className="text-base font-bold tracking-tight text-slate-900 dark:text-slate-100 whitespace-nowrap">
-              DuitKu
-            </span>
-          </div>
+          <BrandLogo size="sm" />
 
           <div className="flex items-center gap-1.5">
             <button

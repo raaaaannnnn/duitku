@@ -1,5 +1,6 @@
 import { Navigate } from 'react-router-dom';
-import { AlertCircle, BarChart3, FileSpreadsheet, Loader2, Moon, ShieldCheck, Sun, Wallet } from 'lucide-react';
+import { AlertCircle, BarChart3, FileSpreadsheet, Loader2, Moon, ShieldCheck, Sun } from 'lucide-react';
+import { BrandLogo } from '@/components/BrandLogo';
 import { useAuth } from '@/lib/authContext';
 import { useTheme } from '@/lib/themeContext';
 
@@ -26,14 +27,7 @@ export function LoginPage() {
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 flex flex-col">
       {/* Top Bar */}
       <header className="w-full max-w-6xl mx-auto px-4 sm:px-8 h-16 flex items-center justify-between">
-        <div className="flex items-center gap-2.5">
-          <div className="flex h-9 w-9 items-center justify-center rounded-xl bg-emerald-600 text-white shrink-0">
-            <Wallet className="h-5 w-5" />
-          </div>
-          <span className="text-lg font-bold tracking-tight whitespace-nowrap">
-            DuitKu
-          </span>
-        </div>
+        <BrandLogo size="md" />
 
         <button
           type="button"
