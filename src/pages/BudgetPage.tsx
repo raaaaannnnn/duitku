@@ -217,7 +217,9 @@ export function BudgetPage() {
           </p>
         </div>
 
-        <MonthYearSelector year={year} month={month} onChange={setPeriod} />
+        <div className="w-full sm:w-auto flex justify-center sm:justify-end">
+          <MonthYearSelector year={year} month={month} onChange={setPeriod} />
+        </div>
       </div>
 
       {/* Monthly Total Budget Card */}

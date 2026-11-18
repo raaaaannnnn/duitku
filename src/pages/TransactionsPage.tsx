@@ -150,32 +150,34 @@ export function TransactionsPage() {
           </p>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2.5">
+        <div className="flex flex-wrap items-center gap-2.5 w-full lg:w-auto">
           <MonthYearSelector year={year} month={month} onChange={setPeriod} />
 
-          <button
-            type="button"
-            onClick={handleExportCsv}
-            className="min-h-[42px] inline-flex items-center gap-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 px-4 py-2 text-sm font-medium text-slate-700 dark:text-slate-200 transition-colors whitespace-nowrap shrink-0 cursor-pointer"
-          >
-            <Download className="h-4 w-4" />
-            <span>Unduh CSV</span>
-          </button>
+          <div className="grid grid-cols-2 sm:flex items-center gap-2.5 w-full sm:w-auto">
+            <button
+              type="button"
+              onClick={handleExportCsv}
+              className="min-h-[42px] inline-flex items-center justify-center gap-2 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 hover:bg-slate-50 dark:hover:bg-slate-800 px-4 py-2 text-sm font-medium text-slate-700 dark:text-slate-200 transition-colors whitespace-nowrap shrink-0 cursor-pointer"
+            >
+              <Download className="h-4 w-4" />
+              <span>Unduh CSV</span>
+            </button>
 
-          <button
-            type="button"
-            onClick={openAddModal}
-            className="min-h-[42px] inline-flex items-center gap-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 px-4 py-2 text-sm font-semibold text-white transition-colors whitespace-nowrap shrink-0 cursor-pointer"
-          >
-            <Plus className="h-4 w-4" />
-            <span>Tambah Transaksi</span>
-          </button>
+            <button
+              type="button"
+              onClick={openAddModal}
+              className="min-h-[42px] inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 px-4 py-2 text-sm font-semibold text-white transition-colors whitespace-nowrap shrink-0 cursor-pointer"
+            >
+              <Plus className="h-4 w-4" />
+              <span>Tambah Transaksi</span>
+            </button>
+          </div>
         </div>
       </div>
 
       {/* Filter & Search Bar */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-2xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 p-3.5">
-        <div className="relative flex-1">
+        <div className="relative flex-1 min-w-0">
           <Search className="pointer-events-none absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
           <input
             type="search"
@@ -187,7 +189,7 @@ export function TransactionsPage() {
           />
         </div>
 
-        <div className="flex items-center gap-1 p-1 rounded-xl bg-slate-100 dark:bg-slate-800 shrink-0">
+        <div className="grid grid-cols-3 sm:inline-flex items-center gap-1 p-1 rounded-xl bg-slate-100 dark:bg-slate-800 w-full sm:w-auto shrink-0">
           {(
             [
               { id: 'all', label: 'Semua' },
@@ -199,7 +201,7 @@ export function TransactionsPage() {
               key={tab.id}
               type="button"
               onClick={() => setTypeFilter(tab.id)}
-              className={`min-h-[34px] rounded-lg px-3 text-xs font-semibold transition-colors whitespace-nowrap ${
+              className={`min-h-[38px] sm:min-h-[34px] w-full sm:w-auto rounded-lg px-1.5 sm:px-3 text-xs font-semibold transition-colors whitespace-nowrap text-center truncate ${
                 typeFilter === tab.id
                   ? 'bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 shadow-sm'
                   : 'text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-200'

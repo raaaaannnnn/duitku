@@ -204,12 +204,12 @@ export function DashboardPage() {
           </p>
         </div>
 
-        <div className="flex flex-wrap items-center gap-3">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-3 w-full sm:w-auto">
           <MonthYearSelector year={year} month={month} onChange={setPeriod} />
           <button
             type="button"
             onClick={() => setModalOpen(true)}
-            className="min-h-[42px] inline-flex items-center gap-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 px-4 py-2 text-sm font-semibold text-white transition-colors whitespace-nowrap shrink-0 cursor-pointer"
+            className="w-full sm:w-auto min-h-[42px] inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 px-4 py-2 text-sm font-semibold text-white transition-colors whitespace-nowrap shrink-0 cursor-pointer"
           >
             <Plus className="h-4 w-4" />
             <span>Tambah Transaksi</span>
