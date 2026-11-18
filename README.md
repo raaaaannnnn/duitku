@@ -6,11 +6,57 @@ DuitKu adalah aplikasi web pencatat keuangan pribadi berbasis **Single Page Appl
 
 - **Autentikasi Google**: Siapa saja dapat masuk dengan akun Google (`signInWithPopup`). Data setiap pengguna terisolasi di path `users/{uid}/...`.
 - **Dashboard Analitik**: Ringkasan Total Pemasukan, Total Pengeluaran, Saldo, grafik pie pengeluaran per kategori, dan grafik batang arus kas 6 bulan terakhir.
-- **Pencatatan Transaksi**: Tambah, edit, dan hapus (dengan konfirmasi) transaksi dalam nominal Rupiah bulat (`> 0`), lengkap dengan pencarian catatan dan filter bulan/tahun.
+- **Pencatatan Transaksi**: Tambah, edit, dan hapus (dengan konfirmasi) transaksi dalam nominal Rupiah bulat (`> 0` dan `< Rp 1.000.000.000.000`), lengkap dengan pencarian catatan, filter tipe (`Semua`, `Pengeluaran`, `Pemasukan`), dan filter bulan/tahun.
 - **Kategori Kustom & Bawaan**: Kategori bawaan otomatis dibuat saat login pertama kali, dan pengguna dapat menambah/menghapus kategori dengan warna pilihan.
 - **Budget Bulanan**: Pengaturan batas pengeluaran total bulanan dan per kategori pengeluaran dengan indikator progress hijau (`< 80%`), kuning (`80%–99%`), dan merah (`>= 100%`).
 - **Ekspor CSV**: Unduh transaksi bulan terpilih dalam format CSV pemisah titik koma (`;`), BOM UTF-8 (siap dibuka langsung di Excel Indonesia), dan proteksi CSV injection.
-- **Mode Gelap & Terang**: Antarmuka responsif mobile-first dengan tema hijau zamrud.
+- **Responsif Mobile-First & Mode Gelap/Terang**: Navigasi sidebar desktop, bottom tab bar untuk mobile, serta dukungan tema gelap dan terang dengan warna utama hijau zamrud.
+
+## Struktur Proyek
+
+```text
+.
+├── .env.example
+├── .gitignore
+├── README.md
+├── firestore.rules
+├── index.html
+├── metadata.json
+├── package.json
+├── postcss.config.js
+├── tailwind.config.js
+├── tsconfig.json
+├── vercel.json
+├── vite.config.ts
+└── src/
+    ├── App.tsx
+    ├── firebase.ts
+    ├── index.css
+    ├── main.tsx
+    ├── types.ts
+    ├── components/
+    │   ├── ConfirmModal.tsx
+    │   ├── ErrorBoundary.tsx
+    │   ├── Layout.tsx
+    │   ├── MonthYearSelector.tsx
+    │   ├── ProtectedRoute.tsx
+    │   ├── SetupMissingScreen.tsx
+    │   └── TransactionModal.tsx
+    ├── lib/
+    │   ├── authContext.tsx
+    │   ├── csv.ts
+    │   ├── firestoreService.ts
+    │   ├── format.ts
+    │   ├── periodContext.tsx
+    │   ├── themeContext.tsx
+    │   └── toastContext.tsx
+    └── pages/
+        ├── BudgetPage.tsx
+        ├── CategoriesPage.tsx
+        ├── DashboardPage.tsx
+        ├── LoginPage.tsx
+        └── TransactionsPage.tsx
+```
 
 ## Menjalankan di Lokal
 
@@ -22,7 +68,13 @@ DuitKu adalah aplikasi web pencatat keuangan pribadi berbasis **Single Page Appl
    ```bash
    cp .env.example .env
    ```
-3. Isi keenam environment variable Firebase di file `.env` (dan opsional `VITE_RECAPTCHA_SITE_KEY` jika mengaktifkan App Check).
+3. Isi keenam environment variable Firebase di file `.env`:
+   - `VITE_FIREBASE_API_KEY`
+   - `VITE_FIREBASE_AUTH_DOMAIN`
+   - `VITE_FIREBASE_PROJECT_ID`
+   - `VITE_FIREBASE_STORAGE_BUCKET`
+   - `VITE_FIREBASE_MESSAGING_SENDER_ID`
+   - `VITE_FIREBASE_APP_ID`
 4. Jalankan server pengembangan:
    ```bash
    npm run dev
@@ -34,26 +86,17 @@ DuitKu adalah aplikasi web pencatat keuangan pribadi berbasis **Single Page Appl
 
 ## Cara Memasang Security Rules (`firestore.rules`) di Firebase Console
 
-Agar data setiap pengguna terlindungi dan tidak bisa dibaca/diubah oleh pengguna lain:
+Agar data setiap pengguna terlindungi dan tervalidasi di level database:
 
 1. Buka [Firebase Console](https://console.firebase.google.com/) dan pilih proyek Firebase Anda.
 2. Pada menu sebelah kiri, klik **Build** -> **Firestore Database**.
 3. Pilih tab **Rules** di bagian atas halaman Firestore Database.
-4. Hapus aturan default yang ada, lalu salin seluruh isi file `firestore.rules` dari root repositori ini ke editor Rules di Firebase Console (file `firestore.rules` sudah membatasi akses per `uid`, memvalidasi skema field per koleksi, serta menolak seluruh path di luar `users/{uid}/...`).
+4. Hapus aturan default yang ada, lalu salin seluruh isi file `firestore.rules` dari root repositori ini ke editor Rules di Firebase Console (sudah membatasi akses per `uid`, memvalidasi skema field `transactions`, `categories`, `budgets`, serta `meta/init`, dan menolak akses ke path lain).
 5. Klik tombol **Publish** untuk mengaktifkan aturan keamanan tersebut.
-
-## Mengaktifkan Firebase App Check (reCAPTCHA v3)
-
-App Check melindungi Firestore dan Authentication dari permintaan tidak sah. Aplikasi tetap berjalan normal jika `VITE_RECAPTCHA_SITE_KEY` dikosongkan (App Check otomatis dilewati).
-
-1. Buka [Google reCAPTCHA Admin](https://www.google.com/recaptcha/admin/create) dan buat site key bertipe **reCAPTCHA v3** untuk domain Anda (misalnya `localhost` dan domain `.vercel.app`).
-2. Salin **Site Key** ke variabel `VITE_RECAPTCHA_SITE_KEY` di `.env` / Vercel Environment Variables.
-3. Di **Firebase Console -> Build -> App Check -> Apps**, pilih aplikasi web Anda, klik **reCAPTCHA v3**, lalu masukkan **Secret Key** dari langkah 1 dan simpan.
-4. Saat menjalankan `npm run dev` di lokal, mode debug App Check otomatis aktif (`FIREBASE_APPCHECK_DEBUG_TOKEN = true`); buka DevTools Console browser untuk menyalin debug token lalu daftarkan di **App Check -> Apps -> Manage debug tokens** bila perlu.
 
 ## Deploy ke Vercel
 
 1. Push repositori ke GitHub/GitLab/Bitbucket.
 2. Impor proyek ke Vercel dengan preset **Vite** (Build Command: `npm run build`, Output Directory: `dist`).
-3. Masukkan keenam environment variable `VITE_FIREBASE_*` (serta `VITE_RECAPTCHA_SITE_KEY` jika memakai App Check) pada menu **Settings -> Environment Variables** di Vercel.
+3. Masukkan keenam environment variable `VITE_FIREBASE_*` pada menu **Settings -> Environment Variables** di Vercel.
 4. Setelah mendapatkan domain Vercel (misalnya `duitku.vercel.app`), buka **Firebase Console -> Authentication -> Settings -> Authorized domains**, lalu tambahkan domain Vercel Anda agar login Google tidak ditolak (`auth/unauthorized-domain`).
